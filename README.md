@@ -1,3 +1,11 @@
+---
+title: Advanced RAG
+emoji: 🔍
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+---
 # Advanced RAG with Hybrid Search, Reranker & FastAPI
 
 ## Overview
