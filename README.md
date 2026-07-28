@@ -9,9 +9,9 @@ pinned: false
 
 # 🚀 Production RAG API
 
-A production-ready Retrieval-Augmented Generation (RAG) system built with **FastAPI**, **FAISS**, **BM25**, **CrossEncoder Reranker**, and **FLAN-T5**.
+A **production-ready Retrieval-Augmented Generation (RAG)** system built with **FastAPI**, **FAISS**, **BM25**, **SentenceTransformers**, **CrossEncoder Reranker**, and **FLAN-T5**.
 
-The project supports PDF ingestion, hybrid retrieval, semantic search, reranking, Docker deployment, and a production-ready REST API.
+The project follows a clean, scalable architecture with dependency injection, persistent indexes, Docker deployment, logging, exception handling, and unit testing.
 
 ---
 
@@ -21,59 +21,59 @@ The project supports PDF ingestion, hybrid retrieval, semantic search, reranking
 - ✂️ Automatic Text Chunking
 - 🧠 SentenceTransformer Embeddings
 - 🔍 FAISS Dense Vector Search
-- 🔎 BM25 Sparse Keyword Search
-- ⚡ Hybrid Retrieval
+- 🔎 BM25 Sparse Retrieval
+- ⚡ Hybrid Search
 - 🎯 CrossEncoder Reranker
 - 🤖 FLAN-T5 Text Generation
 - 🌐 FastAPI REST API
-- 📚 Swagger Documentation
-- 📝 Production Logging
-- ⚠️ Global Exception Handling
+- 📚 Interactive Swagger Documentation
 - ❤️ Health Check Endpoint
+- 📝 Structured Logging
+- ⚠️ Global Exception Handling
 - 💾 Persistent FAISS & BM25 Indexes
-- 🐳 Docker & Docker Compose Support
+- 🐳 Docker & Docker Compose
+- 🧪 Unit Testing
+- 🏗 Clean Production Architecture
 
 ---
 
-# 🏗 System Architecture
+# 🏗 Architecture
 
-```text
-                User
-                  │
-                  ▼
-             FastAPI API
-                  │
-                  ▼
-             RAG Service
-                  │
-                  ▼
-       Hybrid Retrieval Service
-          │               │
-          ▼               ▼
-      FAISS Search    BM25 Search
-          │               │
-          └───────┬───────┘
-                  ▼
-         CrossEncoder Reranker
-                  ▼
-            Top Documents
-                  ▼
-            FLAN-T5 Generator
-                  ▼
-                Answer
 ```
 
----
-
-# 📂 Project Structure
-
-```text
+User
+│
+▼
+FastAPI API
+│
+▼
+Dependency Container
+│
+▼
+RAG Service
+│
+▼
+Hybrid Retrieval
+│
+├──────────────┐
+▼ ▼
+FAISS BM25
+│ │
+└──────┬───────┘
+▼
+CrossEncoder Reranker
+▼
+FLAN-T5 Generator
+▼
+Final Answer
+📂 Project Structure
 Advanced-RAG/
 │
 ├── app/
 │   ├── api/
 │   ├── config/
 │   ├── container/
+│   ├── embeddings/
 │   ├── exceptions/
 │   ├── generation/
 │   ├── index/
@@ -89,58 +89,33 @@ Advanced-RAG/
 ├── data/
 ├── indexes/
 ├── tests/
+│
 ├── Dockerfile
 ├── docker-compose.yml
 ├── requirements.txt
-├── .env
+├── .env.example
 └── README.md
-```
-
----
-
-# ⚙ Installation
-
-Clone the repository
-
-```bash
+⚙ Installation
+Clone Repository
 git clone https://github.com/abdallahyasse/advanced-rag.git
 
 cd advanced-rag
-```
-
 Create Virtual Environment
-
-```bash
 python -m venv venv
-```
-
-Activate
 
 Windows
 
-```bash
 venv\Scripts\activate
-```
 
 Linux / macOS
 
-```bash
 source venv/bin/activate
-```
-
-Install Dependencies
-
-```bash
+Install Requirements
 pip install -r requirements.txt
-```
+⚙ Environment Variables
 
----
+Create a .env
 
-# Environment Variables
-
-Create a `.env` file
-
-```env
 PDF_PATH=data/Abdullah.yasser.pdf
 
 INDEX_DIRECTORY=indexes
@@ -154,127 +129,108 @@ LLM_MODEL=google/flan-t5-base
 CHUNK_SIZE=500
 
 CHUNK_OVERLAP=50
-```
-
----
-
-# Running the API
-
-```bash
+▶ Running the API
 python -m uvicorn app.main:app --reload
-```
+
+The API will start at
+
+http://127.0.0.1:8000
+📚 API Documentation
 
 Swagger UI
 
-```
 http://127.0.0.1:8000/docs
-```
 
-Health Endpoint
+OpenAPI JSON
 
-```
-http://127.0.0.1:8000/health
-```
+http://127.0.0.1:8000/openapi.json
+❤️ Health Check
+GET /health
 
----
+Response
 
-# Docker
+{
+    "status":"healthy",
+    "service":"Production RAG API",
+    "version":"1.0.0"
+}
+🚀 Root Endpoint
+GET /
 
-Build
+Response
 
-```bash
-docker compose build
-```
-
-Run
-
-```bash
-docker compose up
-```
-
-Swagger
-
-```
-http://localhost:8000/docs
-```
-
----
-
-# API Example
-
-## POST `/query`
+{
+    "message":"Production RAG API",
+    "docs":"/docs",
+    "health":"/health"
+}
+🔍 Query Endpoint
+POST /query
 
 Request
 
-```json
 {
     "question":"What is Machine Learning?",
     "top_k":3
 }
-```
 
-Response
+Example Response
 
-```json
 {
     "answer":"Machine Learning is a branch of Artificial Intelligence."
 }
-```
+🐳 Docker
+Build
+docker compose build
+Run
+docker compose up
 
----
+Swagger
 
-# Tech Stack
+http://localhost:8000/docs
+🧪 Run Tests
+pytest
 
-- Python
-- FastAPI
-- FAISS
-- Rank-BM25
-- Sentence Transformers
-- CrossEncoder
-- Transformers
-- FLAN-T5
-- Docker
-- Docker Compose
+or
 
----
+pytest tests/
+🛠 Tech Stack
+Python
+FastAPI
+FAISS
+Rank-BM25
+Sentence Transformers
+CrossEncoder
+Transformers
+FLAN-T5
+Docker
+Docker Compose
+Pytest
+🏆 Production Features
+✅ Hybrid Retrieval
+✅ Dense + Sparse Search
+✅ CrossEncoder Reranking
+✅ Dependency Injection
+✅ Persistent Vector Index
+✅ Configuration Management
+✅ Structured Logging
+✅ Exception Handling
+✅ Docker Deployment
+✅ REST API
+✅ Swagger Documentation
+✅ Unit Tests
+👨‍💻 Author
 
-# Production Features
-
-- Hybrid Retrieval
-- Semantic Search
-- Reranking
-- Dependency Injection
-- Configuration Management
-- Logging
-- Exception Handling
-- Health Monitoring
-- Persistent Index Storage
-- Docker Deployment
-
----
-
-# Future Improvements
-
-- Multi-file Upload API
-- Streaming Responses
-- Conversation Memory
-- ChromaDB / Milvus Support
-- Redis Cache
-- Authentication
-- Prometheus Metrics
-- CI/CD Pipeline
-- Cloud Deployment (Azure / AWS / GCP)
-
----
-
-# Author
-
-**Abdalla Yasser**
+Abdalla Yasser
 
 AI Engineer
 
-GitHub:
+GitHub
+
 https://github.com/abdallahyasse
 
-LinkedIn:
+LinkedIn
+
 https://www.linkedin.com/in/abdullah-yasser-6a7748183
+
+هذا الشكل احترافي جدًا ومناسب لـ **GitHub** و**Hugging Face Spaces**، ويعكس أن المشروع Production-ready وليس مجرد مشروع تعليمي.
