@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  rag-api:
+    build: .
+    container_name: production-rag-api
+
+    ports:
+      - "8000:8000"
+
+    restart: unless-stopped
+
+    volumes:
+      - ./indexes:/app/indexes
+      - ./data:/app/data
+
+    env_file:
+      - .env

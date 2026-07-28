@@ -1,4 +1,9 @@
 venv/
 __pycache__/
+.git/
+.pytest_cache/
 *.pyc
-*.pdf
+*.pyo
+*.pyd
+.idea/
+.vscode/

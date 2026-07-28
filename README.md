@@ -1,110 +1,120 @@
 ---
-title: Advanced RAG
-emoji: 🔍
+title: Production RAG API
+emoji: 🚀
 colorFrom: blue
 colorTo: purple
 sdk: docker
 pinned: false
 ---
-# Advanced RAG with Hybrid Search, Reranker & FastAPI
 
-## Overview
+# 🚀 Production RAG API
 
-This project is an advanced Retrieval-Augmented Generation (RAG) system that combines dense retrieval, keyword search, reranking, and text generation to provide accurate answers from PDF documents.
+A production-ready Retrieval-Augmented Generation (RAG) system built with **FastAPI**, **FAISS**, **BM25**, **CrossEncoder Reranker**, and **FLAN-T5**.
 
-The system supports multiple PDF files, preserves document metadata (source and page number), and exposes a REST API using FastAPI. The project is fully containerized with Docker.
-
----
-
-## Features
-
-* Hybrid Search (BM25 + FAISS)
-* Dense Embeddings using Sentence Transformers
-* Cross-Encoder Reranker
-* Multi-PDF Support
-* Source & Page Metadata
-* FLAN-T5 Text Generation
-* FastAPI REST API
-* Docker Support
+The project supports PDF ingestion, hybrid retrieval, semantic search, reranking, Docker deployment, and a production-ready REST API.
 
 ---
 
-## Project Structure
+# ✨ Features
+
+- 📄 PDF Ingestion
+- ✂️ Automatic Text Chunking
+- 🧠 SentenceTransformer Embeddings
+- 🔍 FAISS Dense Vector Search
+- 🔎 BM25 Sparse Keyword Search
+- ⚡ Hybrid Retrieval
+- 🎯 CrossEncoder Reranker
+- 🤖 FLAN-T5 Text Generation
+- 🌐 FastAPI REST API
+- 📚 Swagger Documentation
+- 📝 Production Logging
+- ⚠️ Global Exception Handling
+- ❤️ Health Check Endpoint
+- 💾 Persistent FAISS & BM25 Indexes
+- 🐳 Docker & Docker Compose Support
+
+---
+
+# 🏗 System Architecture
+
+```text
+                User
+                  │
+                  ▼
+             FastAPI API
+                  │
+                  ▼
+             RAG Service
+                  │
+                  ▼
+       Hybrid Retrieval Service
+          │               │
+          ▼               ▼
+      FAISS Search    BM25 Search
+          │               │
+          └───────┬───────┘
+                  ▼
+         CrossEncoder Reranker
+                  ▼
+            Top Documents
+                  ▼
+            FLAN-T5 Generator
+                  ▼
+                Answer
+```
+
+---
+
+# 📂 Project Structure
 
 ```text
 Advanced-RAG/
 │
-├── app.py
-├── Dockerfile
-├── requirements.txt
-├── data/
-├── src/
-│   ├── embeddings.py
-│   ├── bm25_search.py
-│   ├── vector_store.py
-│   ├── hybrid_search.py
-│   ├── reranker.py
-│   ├── ingestion.py
-│   ├── generator.py
-│   └── rag_pipeline.py
+├── app/
+│   ├── api/
+│   ├── config/
+│   ├── container/
+│   ├── exceptions/
+│   ├── generation/
+│   ├── index/
+│   ├── logging/
+│   ├── middleware/
+│   ├── persistence/
+│   ├── reranker/
+│   ├── retrieval/
+│   ├── services/
+│   ├── vectorstore/
+│   └── main.py
 │
-├── test_pdf.py
-├── test_hybrid.py
-└── test_rag.py
+├── data/
+├── indexes/
+├── tests/
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+├── .env
+└── README.md
 ```
 
 ---
 
-## Architecture
+# ⚙ Installation
 
-```
-PDF Documents
-      │
-      ▼
-Document Loader
-      │
-      ▼
-Chunking
-      │
-      ▼
-SentenceTransformer Embeddings
-      │
-      ▼
-FAISS Vector Database
-      │
-      ├───────────────┐
-      ▼               ▼
-Dense Search      BM25 Search
-      │               │
-      └──────┬────────┘
-             ▼
-      Hybrid Retrieval
-             ▼
- Cross Encoder Reranker
-             ▼
-      FLAN-T5 Generator
-             ▼
-         Final Answer
-```
-
----
-
-## Installation
-
-Clone the repository:
+Clone the repository
 
 ```bash
 git clone https://github.com/abdallahyasse/advanced-rag.git
+
 cd advanced-rag
 ```
 
-Create a virtual environment:
+Create Virtual Environment
 
 ```bash
 python -m venv venv
 ```
 
-Activate it:
+Activate
 
 Windows
 
@@ -112,7 +122,13 @@ Windows
 venv\Scripts\activate
 ```
 
-Install dependencies:
+Linux / macOS
+
+```bash
+source venv/bin/activate
+```
+
+Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -120,72 +136,145 @@ pip install -r requirements.txt
 
 ---
 
-## Run the API
+# Environment Variables
+
+Create a `.env` file
+
+```env
+PDF_PATH=data/Abdullah.yasser.pdf
+
+INDEX_DIRECTORY=indexes
+
+EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+
+RERANKER_MODEL=cross-encoder/ms-marco-MiniLM-L-6-v2
+
+LLM_MODEL=google/flan-t5-base
+
+CHUNK_SIZE=500
+
+CHUNK_OVERLAP=50
+```
+
+---
+
+# Running the API
 
 ```bash
-uvicorn app:app --reload
+python -m uvicorn app.main:app --reload
 ```
 
-API will be available at:
-
-```
-http://127.0.0.1:8000
-```
-
-Swagger UI:
+Swagger UI
 
 ```
 http://127.0.0.1:8000/docs
 ```
 
----
+Health Endpoint
 
-## Docker
-
-Build the image:
-
-```bash
-docker build -t advanced-rag .
 ```
-
-Run the container:
-
-```bash
-docker run -p 8000:8000 advanced-rag
+http://127.0.0.1:8000/health
 ```
 
 ---
 
-## Technologies
+# Docker
 
-* Python
-* FastAPI
-* FAISS
-* Sentence Transformers
-* Rank-BM25
-* Transformers
-* FLAN-T5
-* Docker
+Build
 
----
+```bash
+docker compose build
+```
 
-## Future Improvements
+Run
 
-* Persistent Vector Database (ChromaDB / Milvus)
-* Streaming Responses
-* Authentication
-* CI/CD Pipeline
-* Cloud Deployment
-* LLM APIs (OpenAI, Gemini, Claude)
+```bash
+docker compose up
+```
+
+Swagger
+
+```
+http://localhost:8000/docs
+```
 
 ---
 
-## Author
+# API Example
+
+## POST `/query`
+
+Request
+
+```json
+{
+    "question":"What is Machine Learning?",
+    "top_k":3
+}
+```
+
+Response
+
+```json
+{
+    "answer":"Machine Learning is a branch of Artificial Intelligence."
+}
+```
+
+---
+
+# Tech Stack
+
+- Python
+- FastAPI
+- FAISS
+- Rank-BM25
+- Sentence Transformers
+- CrossEncoder
+- Transformers
+- FLAN-T5
+- Docker
+- Docker Compose
+
+---
+
+# Production Features
+
+- Hybrid Retrieval
+- Semantic Search
+- Reranking
+- Dependency Injection
+- Configuration Management
+- Logging
+- Exception Handling
+- Health Monitoring
+- Persistent Index Storage
+- Docker Deployment
+
+---
+
+# Future Improvements
+
+- Multi-file Upload API
+- Streaming Responses
+- Conversation Memory
+- ChromaDB / Milvus Support
+- Redis Cache
+- Authentication
+- Prometheus Metrics
+- CI/CD Pipeline
+- Cloud Deployment (Azure / AWS / GCP)
+
+---
+
+# Author
 
 **Abdalla Yasser**
 
-Artificial Intelligence Engineer
+AI Engineer
 
-GitHub: https://github.com/abdallahyasse
+GitHub:
+https://github.com/abdallahyasse
 
-LinkedIn: https://www.linkedin.com/in/abdullah-yasser-6a7748183
+LinkedIn:
+https://www.linkedin.com/in/abdullah-yasser-6a7748183
