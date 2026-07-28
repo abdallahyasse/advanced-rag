@@ -9,7 +9,7 @@ pinned: false
 
 # 🚀 Production RAG API
 
-A **production-ready Retrieval-Augmented Generation (RAG)** system built with **FastAPI**, **FAISS**, **BM25**, **SentenceTransformers**, **CrossEncoder Reranker**, and **FLAN-T5**.
+A production-ready Retrieval-Augmented Generation (RAG) system built with **FastAPI**, **FAISS**, **BM25**, **SentenceTransformers**, **CrossEncoder Reranker**, and **FLAN-T5**.
 
 The project follows a clean, scalable architecture with dependency injection, persistent indexes, Docker deployment, logging, exception handling, and unit testing.
 
@@ -39,34 +39,38 @@ The project follows a clean, scalable architecture with dependency injection, pe
 
 # 🏗 Architecture
 
+```text
+                User
+                  │
+                  ▼
+             FastAPI API
+                  │
+                  ▼
+       Dependency Container
+                  │
+                  ▼
+             RAG Service
+                  │
+                  ▼
+         Hybrid Retrieval
+          │             │
+          ▼             ▼
+      FAISS Search   BM25 Search
+          │             │
+          └──────┬──────┘
+                 ▼
+     CrossEncoder Reranker
+                 ▼
+        FLAN-T5 Generator
+                 ▼
+            Final Answer
 ```
 
-User
-│
-▼
-FastAPI API
-│
-▼
-Dependency Container
-│
-▼
-RAG Service
-│
-▼
-Hybrid Retrieval
-│
-├──────────────┐
-▼ ▼
-FAISS BM25
-│ │
-└──────┬───────┘
-▼
-CrossEncoder Reranker
-▼
-FLAN-T5 Generator
-▼
-Final Answer
-📂 Project Structure
+---
+
+# 📂 Project Structure
+
+```text
 Advanced-RAG/
 │
 ├── app/
@@ -95,27 +99,50 @@ Advanced-RAG/
 ├── requirements.txt
 ├── .env.example
 └── README.md
-⚙ Installation
-Clone Repository
+```
+
+---
+
+# ⚙ Installation
+
+## Clone Repository
+
+```bash
 git clone https://github.com/abdallahyasse/advanced-rag.git
-
 cd advanced-rag
-Create Virtual Environment
+```
+
+## Create Virtual Environment
+
+```bash
 python -m venv venv
+```
 
-Windows
+### Windows
 
+```bash
 venv\Scripts\activate
+```
 
-Linux / macOS
+### Linux / macOS
 
+```bash
 source venv/bin/activate
-Install Requirements
+```
+
+## Install Requirements
+
+```bash
 pip install -r requirements.txt
-⚙ Environment Variables
+```
 
-Create a .env
+---
 
+# ⚙ Environment Variables
+
+Create a `.env` file:
+
+```env
 PDF_PATH=data/Abdullah.yasser.pdf
 
 INDEX_DIRECTORY=indexes
@@ -129,108 +156,178 @@ LLM_MODEL=google/flan-t5-base
 CHUNK_SIZE=500
 
 CHUNK_OVERLAP=50
-▶ Running the API
+```
+
+---
+
+# ▶ Running the API
+
+```bash
 python -m uvicorn app.main:app --reload
+```
 
-The API will start at
+API:
 
+```
 http://127.0.0.1:8000
-📚 API Documentation
+```
 
-Swagger UI
+---
 
-http://127.0.0.1:8000/docs
-
-OpenAPI JSON
-
-http://127.0.0.1:8000/openapi.json
-❤️ Health Check
-GET /health
-
-Response
-
-{
-    "status":"healthy",
-    "service":"Production RAG API",
-    "version":"1.0.0"
-}
-🚀 Root Endpoint
-GET /
-
-Response
-
-{
-    "message":"Production RAG API",
-    "docs":"/docs",
-    "health":"/health"
-}
-🔍 Query Endpoint
-POST /query
-
-Request
-
-{
-    "question":"What is Machine Learning?",
-    "top_k":3
-}
-
-Example Response
-
-{
-    "answer":"Machine Learning is a branch of Artificial Intelligence."
-}
-🐳 Docker
-Build
-docker compose build
-Run
-docker compose up
+# 📚 API Documentation
 
 Swagger
 
+```
+http://127.0.0.1:8000/docs
+```
+
+OpenAPI
+
+```
+http://127.0.0.1:8000/openapi.json
+```
+
+---
+
+# ❤️ Health Check
+
+```http
+GET /health
+```
+
+Response
+
+```json
+{
+  "status": "healthy",
+  "service": "Production RAG API",
+  "version": "1.0.0"
+}
+```
+
+---
+
+# 🚀 Root Endpoint
+
+```http
+GET /
+```
+
+```json
+{
+  "message": "Production RAG API",
+  "docs": "/docs",
+  "health": "/health"
+}
+```
+
+---
+
+# 🔍 Query Endpoint
+
+```http
+POST /query
+```
+
+Request
+
+```json
+{
+  "question": "What is Machine Learning?",
+  "top_k": 3
+}
+```
+
+Response
+
+```json
+{
+  "answer": "Machine Learning is a branch of Artificial Intelligence."
+}
+```
+
+---
+
+# 🐳 Docker
+
+Build
+
+```bash
+docker compose build
+```
+
+Run
+
+```bash
+docker compose up
+```
+
+Swagger
+
+```
 http://localhost:8000/docs
-🧪 Run Tests
+```
+
+---
+
+# 🧪 Run Tests
+
+```bash
 pytest
+```
 
 or
 
+```bash
 pytest tests/
-🛠 Tech Stack
-Python
-FastAPI
-FAISS
-Rank-BM25
-Sentence Transformers
-CrossEncoder
-Transformers
-FLAN-T5
-Docker
-Docker Compose
-Pytest
-🏆 Production Features
-✅ Hybrid Retrieval
-✅ Dense + Sparse Search
-✅ CrossEncoder Reranking
-✅ Dependency Injection
-✅ Persistent Vector Index
-✅ Configuration Management
-✅ Structured Logging
-✅ Exception Handling
-✅ Docker Deployment
-✅ REST API
-✅ Swagger Documentation
-✅ Unit Tests
-👨‍💻 Author
+```
 
-Abdalla Yasser
+---
+
+# 🛠 Tech Stack
+
+- Python
+- FastAPI
+- FAISS
+- Rank-BM25
+- Sentence Transformers
+- CrossEncoder
+- Transformers
+- FLAN-T5
+- Docker
+- Docker Compose
+- Pytest
+
+---
+
+# 🏆 Production Features
+
+- ✅ Hybrid Retrieval
+- ✅ Dense + Sparse Search
+- ✅ CrossEncoder Reranking
+- ✅ Dependency Injection
+- ✅ Persistent Vector Index
+- ✅ Configuration Management
+- ✅ Structured Logging
+- ✅ Exception Handling
+- ✅ Docker Deployment
+- ✅ REST API
+- ✅ Swagger Documentation
+- ✅ Unit Tests
+
+---
+
+# 👨‍💻 Author
+
+**Abdalla Yasser**
 
 AI Engineer
 
-GitHub
+**GitHub**
 
 https://github.com/abdallahyasse
 
-LinkedIn
+**LinkedIn**
 
 https://www.linkedin.com/in/abdullah-yasser-6a7748183
-
-هذا الشكل احترافي جدًا ومناسب لـ **GitHub** و**Hugging Face Spaces**، ويعكس أن المشروع Production-ready وليس مجرد مشروع تعليمي.
