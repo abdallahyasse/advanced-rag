@@ -1,5 +1,5 @@
 ---
-title: Production RAG API
+title: 🚀 Production Agentic RAG API
 emoji: 🚀
 colorFrom: blue
 colorTo: purple
@@ -9,96 +9,147 @@ pinned: false
 
 # 🚀 Production RAG API
 
-A production-ready Retrieval-Augmented Generation (RAG) system built with **FastAPI**, **FAISS**, **BM25**, **SentenceTransformers**, **CrossEncoder Reranker**, and **FLAN-T5**.
+A production-ready Agentic Retrieval-Augmented Generation (RAG) system built with FastAPI, FAISS, BM25, SentenceTransformers, CrossEncoder, FLAN-T5, Reflection Agents, Conversation Memory, Query Rewriting, Retrieval Evaluation and Retry Pipeline.
 
-The project follows a clean, scalable architecture with dependency injection, persistent indexes, Docker deployment, logging, exception handling, and unit testing.
+The project follows a modular AI architecture inspired by modern Agentic RAG systems with clean dependency injection, persistent indexes, memory, evaluation loops, Docker deployment and scalable components..
 
 ---
 
 # ✨ Features
 
+### Core RAG
+
 - 📄 PDF Ingestion
-- ✂️ Automatic Text Chunking
+- ✂️ Automatic Chunking
 - 🧠 SentenceTransformer Embeddings
-- 🔍 FAISS Dense Vector Search
+- 🔍 FAISS Dense Retrieval
 - 🔎 BM25 Sparse Retrieval
 - ⚡ Hybrid Search
-- 🎯 CrossEncoder Reranker
-- 🤖 FLAN-T5 Text Generation
-- 🌐 FastAPI REST API
-- 📚 Interactive Swagger Documentation
-- ❤️ Health Check Endpoint
+- 🎯 CrossEncoder Reranking
+- 🤖 FLAN-T5 Generation
+
+### Agentic RAG
+
+- 🧠 Reflection Agent
+- ✍️ Query Rewriter
+- 🔍 Search Query Rewriter
+- 📊 Retrieval Evaluation
+- 🔁 Automatic Retrieval Retry
+- 💬 Conversation Memory
+- 📚 Context Builder
+
+### Agent Framework
+
+- 🛠 Tool Registry
+- 📄 PDF Tool
+- 🔢 Calculator Tool
+- 🤖 RAG Tool
+- 🧩 Planner
+- ⚙️ Executor
+- 📤 Output Parser
+
+### LangGraph
+
+- 🌐 LangGraph Ready
+- 🧠 Graph State
+- 🔀 Nodes & Edges
+
+### API
+
+- 🌐 FastAPI
+- 📚 Swagger
+- ❤️ Health Endpoint
+
+### Production
+
 - 📝 Structured Logging
-- ⚠️ Global Exception Handling
-- 💾 Persistent FAISS & BM25 Indexes
-- 🐳 Docker & Docker Compose
-- 🧪 Unit Testing
-- 🏗 Clean Production Architecture
+- ⚠️ Exception Handling
+- 💾 Persistent Indexes
+- 🐳 Docker
+- 🧪 Unit Tests
+- 🏗 Clean Architecture
 
 ---
 
 # 🏗 Architecture
 
 ```text
-                User
-                  │
-                  ▼
-             FastAPI API
-                  │
-                  ▼
-       Dependency Container
-                  │
-                  ▼
-             RAG Service
-                  │
-                  ▼
-         Hybrid Retrieval
-          │             │
-          ▼             ▼
-      FAISS Search   BM25 Search
-          │             │
-          └──────┬──────┘
-                 ▼
-     CrossEncoder Reranker
-                 ▼
-        FLAN-T5 Generator
-                 ▼
-            Final Answer
-```
+                    User
+                      │
+                      ▼
+             Agentic RAG Workflow
+                      │
+          ┌───────────┴───────────┐
+          │                       │
+          ▼                       ▼
+   Reflection Agent        Conversation Memory
+          │                       │
+          └───────────┬───────────┘
+                      ▼
+              Query Rewriter
+                      ▼
+             Hybrid Retrieval
+              ┌──────────────┐
+              │              │
+              ▼              ▼
+          FAISS         BM25 Search
+              └──────┬──────┘
+                     ▼
+          CrossEncoder Reranker
+                     ▼
+             FLAN-T5 Generator
+                     ▼
+          Retrieval Evaluation
+                     │
+      enough? ───────┴──────── no
+          │                    │
+         yes                   ▼
+          │            Search Query Rewriter
+          │                    │
+          └────────────Retry────┘
+                     ▼
+                Final Answer
 
 ---
 
-# 📂 Project Structure
-
 ```text
-Advanced-RAG/
+app/
 │
-├── app/
-│   ├── api/
-│   ├── config/
-│   ├── container/
-│   ├── embeddings/
-│   ├── exceptions/
-│   ├── generation/
-│   ├── index/
-│   ├── logging/
-│   ├── middleware/
-│   ├── persistence/
-│   ├── reranker/
-│   ├── retrieval/
-│   ├── services/
-│   ├── vectorstore/
-│   └── main.py
+├── agent/
 │
-├── data/
-├── indexes/
-├── tests/
+├── agentic_rag/
 │
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-├── .env.example
-└── README.md
+├── api/
+│
+├── config/
+│
+├── container/
+│
+├── embeddings/
+│
+├── generation/
+│
+├── index/
+│
+├── langgraph_agent/
+│
+├── llm/
+│
+├── logging/
+│
+├── memory/
+│
+├── persistence/
+│
+├── reranker/
+│
+├── retrieval/
+│
+├── services/
+│
+├── vectorstore/
+│
+└── main.py
 ```
 
 ---
@@ -156,6 +207,9 @@ LLM_MODEL=google/flan-t5-base
 CHUNK_SIZE=500
 
 CHUNK_OVERLAP=50
+```env
+PLANNER_MODEL=llama-3.3-70b-versatile
+GROQ_API_KEY=your_key_here
 ```
 
 ---
@@ -290,32 +344,69 @@ pytest tests/
 - Python
 - FastAPI
 - FAISS
-- Rank-BM25
-- Sentence Transformers
+- BM25
+- SentenceTransformers
 - CrossEncoder
 - Transformers
 - FLAN-T5
+- Groq API
+- LangGraph
 - Docker
-- Docker Compose
 - Pytest
 
 ---
 
 # 🏆 Production Features
 
-- ✅ Hybrid Retrieval
-- ✅ Dense + Sparse Search
-- ✅ CrossEncoder Reranking
-- ✅ Dependency Injection
-- ✅ Persistent Vector Index
-- ✅ Configuration Management
-- ✅ Structured Logging
-- ✅ Exception Handling
-- ✅ Docker Deployment
-- ✅ REST API
-- ✅ Swagger Documentation
-- ✅ Unit Tests
+## Retrieval
 
+- ✅ Dense Retrieval
+- ✅ Sparse Retrieval
+- ✅ Hybrid Search
+- ✅ CrossEncoder Reranking
+
+## Agentic RAG
+
+- ✅ Reflection
+- ✅ Query Rewriting
+- ✅ Retrieval Evaluation
+- ✅ Automatic Retry
+- ✅ Conversation Memory
+- ✅ Context Builder
+
+## AI Agent
+
+- ✅ Tool Framework
+- ✅ Planner
+- ✅ Executor
+- ✅ LangGraph Ready
+
+## Infrastructure
+
+- ✅ Dependency Injection
+- ✅ Docker
+- ✅ Persistent Indexes
+- ✅ Logging
+- ✅ Exception Handling
+- ✅ REST API
+- ✅ Swagger
+
+---
+# 🚧 Roadmap
+
+- ✅ Production RAG
+- ✅ Agentic RAG
+- 🔄 Full Tool Calling Agent
+- 🔄 GraphRAG
+- 🔄 Semantic Cache
+- 🔄 LangGraph Agent
+- 🔄 Multi-Agent System
+- 🔄 Browser Agent
+- 🔄 Text-to-SQL
+- 🔄 MCP Server / Client
+- 🔄 LLMOps Platform
+- 🔄 Kubernetes
+- 🔄 AWS Deployment
 ---
 
 # 👨‍💻 Author
