@@ -1,10 +1,13 @@
 from app.config.settings import settings
 
-from src.ingestion import ingest_pdf
-
+from app.ingestion import ingest_pdf
 from app.index.index_manager import IndexManager
 from app.retrieval.hybrid_service import HybridRetrievalService
 from app.services.rag_service import RAGService
+
+from app.memory.conversation_memory import ConversationMemory
+from app.memory.memory_service import MemoryService
+from app.memory.context_builder import ContextBuilder
 
 from app.logging.logger import get_logger
 
@@ -43,8 +46,25 @@ class Container:
             bm25_service=bm25_service,
         )
 
+        # Retriever
+        self.retriever = retriever
+
+        # RAG Service
         self.rag_service = RAGService(
             retriever=retriever,
+        )
+
+        # Conversation Memory
+        self.memory = ConversationMemory()
+
+        # Memory Service
+        self.memory_service = MemoryService(
+            memory=self.memory,
+        )
+
+        # Context Builder
+        self.context_builder = ContextBuilder(
+            memory_service=self.memory_service,
         )
 
 

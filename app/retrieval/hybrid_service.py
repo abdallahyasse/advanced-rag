@@ -1,14 +1,22 @@
 from app.vectorstore.faiss_store import FAISSVectorStore
 from app.retrieval.bm25_service import BM25Service
-
+from app.reranker.reranker_service import RerankerService
 
 class HybridRetrievalService:
     """
-    Hybrid Retrieval Service.
+    Production Hybrid Retrieval Service.
 
-    Combines:
-    - Dense Retrieval (FAISS)
-    - Sparse Retrieval (BM25)
+    Pipeline:
+
+    FAISS
+        +
+    BM25
+        ↓
+    Merge
+        ↓
+    Cross Encoder Reranker
+        ↓
+    Top Documents
     """
 
     def __init__(
@@ -44,4 +52,12 @@ class HybridRetrievalService:
             if idx not in merged:
                 merged[idx] = result
 
-        return list(merged.values())
+        merged_results = list(merged.values())
+
+        reranked = RerankerService.rerank(
+            query=query,
+            documents=merged_results,
+            top_k=top_k,
+        )
+
+        return reranked

@@ -1,5 +1,4 @@
 from app.generation.generator_service import GeneratorService
-from app.reranker.reranker_service import RerankerService
 from app.retrieval.hybrid_service import HybridRetrievalService
 
 
@@ -8,13 +7,16 @@ class RAGService:
     Production RAG Service.
 
     Pipeline:
-    Query
+
+    Question
         ↓
     Hybrid Retrieval
         ↓
     CrossEncoder Reranker
         ↓
-    LLM Generator
+    Generator
+        ↓
+    Answer
     """
 
     def __init__(
@@ -31,12 +33,6 @@ class RAGService:
 
         documents = self.retriever.search(
             query=question,
-            top_k=top_k,
-        )
-
-        documents = RerankerService.rerank(
-            query=question,
-            documents=documents,
             top_k=top_k,
         )
 
