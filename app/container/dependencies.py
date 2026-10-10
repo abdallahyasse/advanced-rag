@@ -11,6 +11,7 @@ from app.memory.context_builder import ContextBuilder
 
 from app.logging.logger import get_logger
 
+
 logger = get_logger(__name__)
 
 
@@ -28,17 +29,12 @@ class Container:
             filename=settings.pdf_path,
         )
 
-        chunks = [
-            document["text"]
-            for document in documents
-        ]
-
         manager = IndexManager(
             directory=settings.index_directory,
         )
 
         vector_store, bm25_service = manager.initialize(
-            chunks,
+            documents,
         )
 
         retriever = HybridRetrievalService(

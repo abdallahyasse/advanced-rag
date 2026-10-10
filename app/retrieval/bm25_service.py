@@ -9,24 +9,31 @@ class BM25Service:
     Responsible for:
     - Building BM25 index
     - Searching documents
+    - Preserving document metadata
     """
 
     def __init__(self):
         self.bm25: BM25Okapi | None = None
-        self.chunks: list[str] = []
+        self.documents: list[dict] = []
 
-    def build(self, chunks: list[str]) -> None:
+    def build(
+        self,
+        documents: list[dict],
+    ) -> None:
         """
         Build the BM25 index.
         """
-        self.chunks = chunks
 
-        tokenized_chunks = [
-            chunk.lower().split()
-            for chunk in chunks
+        self.documents = documents
+
+        tokenized_documents = [
+            document["text"].lower().split()
+            for document in documents
         ]
 
-        self.bm25 = BM25Okapi(tokenized_chunks)
+        self.bm25 = BM25Okapi(
+            tokenized_documents
+        )
 
     def search(
         self,
@@ -38,28 +45,55 @@ class BM25Service:
         """
 
         if self.bm25 is None:
-            raise RuntimeError("BM25 index has not been built.")
+            raise RuntimeError(
+                "BM25 index has not been built."
+            )
 
         query_tokens = query.lower().split()
 
         scores = np.array(
-            self.bm25.get_scores(query_tokens)
+            self.bm25.get_scores(
+                query_tokens
+            )
         )
 
-        top_indices = scores.argsort()[::-1][:top_k]
+        # Keep only documents with an actual BM25 match
+        valid_indices = np.where(
+            scores > 0.0
+        )[0]
+
+        if len(valid_indices) == 0:
+            return []
+
+        # Sort valid documents by BM25 score
+        sorted_indices = valid_indices[
+            np.argsort(
+                scores[valid_indices]
+            )[::-1]
+        ]
+
+        top_indices = sorted_indices[:top_k]
 
         results = []
 
         for idx in top_indices:
+            idx = int(idx)
 
-            if idx < 0 or idx >= len(self.chunks):
+            if (
+                idx < 0
+                or idx >= len(self.documents)
+            ):
                 continue
+
+            document = self.documents[idx]
 
             results.append(
                 {
-                    "text": self.chunks[idx],
+                    "text": document["text"],
+                    "page": document.get("page"),
+                    "source": document.get("source"),
                     "score": float(scores[idx]),
-                    "index": int(idx),
+                    "index": idx,
                 }
             )
 

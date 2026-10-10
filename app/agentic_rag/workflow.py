@@ -11,112 +11,80 @@ from app.agentic_rag.retrieval_guard import RetrievalGuard
 
 class AgenticRAGWorkflow:
     """
-    Production Agentic RAG Workflow
+    Agentic RAG workflow.
 
-    User
-        ↓
-    Reflection
-        ↓
-    Rewrite
-        ↓
-    Retrieve
-        ↓
-    Generate
-        ↓
-    Evaluate
-        ↓
-    Retry (if needed)
-        ↓
-    Save Memory
+    Flow:
+        Original Question
+            -> Reflection
+            -> Optional Query Rewrite
+            -> Retrieval
+            -> Evidence Evaluation
+            -> Bounded Search Retries
+            -> Safe Final Answer
+            -> Save Conversation Memory
     """
 
     def __init__(self):
-
         self.reflector = ReflectionAgent()
-
         self.rewriter = QueryRewriter()
-
         self.search_rewriter = SearchQueryRewriter()
-
         self.evaluator = EvaluatorAgent()
 
-    def run(
-        self,
-        question: str,
-    ):
+    def run(self, question: str) -> dict:
+        original_question = question
+        search_question = question
 
-        # -----------------------------
-        # Save User Message
-        # -----------------------------
-        container.memory_service.remember_user(
-            question
-        )
+        # 1. Save the user question
+        container.memory_service.remember_user(original_question)
 
-        # -----------------------------
-        # Reflection
-        # -----------------------------
-        reflection = self.reflector.reflect(
-            question
-        )
+        # 2. Reflection
+        reflection = self.reflector.reflect(original_question)
 
         print("\n========== Reflection ==========")
         print(reflection)
 
-        rewritten_question = question
-
-        # -----------------------------
-        # Rewrite
-        # -----------------------------
+        # 3. Optional conversational query rewrite
         if reflection.needs_rewrite:
+            conversation_context = (
+                container.context_builder.build_context(
+                    original_question
+                )
+            )
 
             rewrite = self.rewriter.rewrite(
-                question
+                question=original_question,
+                conversation_context=conversation_context,
             )
 
-            rewritten_question = (
-                rewrite.rewritten_question
-            )
+            search_question = rewrite.rewritten_question
 
-            print("\n========== Rewritten ==========")
+            print("\n========== Query Rewrite ==========")
             print(rewrite)
 
-        # -----------------------------
-        # Initial Retrieval
-        # -----------------------------
-        answer = container.rag_service.ask(
-            rewritten_question
+        # 4. Initial retrieval
+        top_k = 3
+
+        rag_result = container.rag_service.ask(
+            search_question,
+            top_k=top_k,
         )
 
-        # -----------------------------
-        # Initial Evaluation
-        # -----------------------------
+        # Always evaluate evidence against the original question.
         evaluation = self.evaluator.evaluate(
-            question=rewritten_question,
-            context=answer,
+            question=original_question,
+            context=rag_result["context"],
         )
 
-        print("\n========== Evaluation ==========")
+        print("\n========== Initial Evaluation ==========")
         print(evaluation)
 
-        # -----------------------------
-        # Retry Controller
-        # -----------------------------
         retry_state = RetryState()
-
         previous_hash = RetrievalGuard.fingerprint(
-            answer
+            rag_result["context"]
         )
 
-        while not evaluation.enough_context:
-
-            if not retry_state.can_retry():
-
-                print(
-                    "\n========== Max Retry =========="
-                )
-
-                break
-
+        # 5. Bounded retry loop
+        while not evaluation.enough_context and retry_state.can_retry():
             retry_state.increase()
 
             print(
@@ -124,59 +92,73 @@ class AgenticRAGWorkflow:
             )
 
             retry = self.search_rewriter.rewrite(
-                question=rewritten_question,
+                question=search_question,
                 reason=evaluation.reason,
             )
 
-            rewritten_question = (
-                retry.rewritten_question
-            )
+            candidate_question = retry.rewritten_question
 
+            print("\n========== Search Query Rewrite ==========")
             print(retry)
 
-            answer = container.rag_service.ask(
-                rewritten_question
+            # Increase retrieval breadth gradually.
+            top_k = min(top_k + 2, 12)
+
+            print(
+                f"\n========== Retrieval: top_k={top_k} =========="
+            )
+
+            candidate_result = container.rag_service.ask(
+                candidate_question,
+                top_k=top_k,
             )
 
             current_hash = RetrievalGuard.fingerprint(
-                answer
+                candidate_result["context"]
             )
 
+            # Stop if this retry adds no new context.
             if current_hash == previous_hash:
-
-                print(
-                    "\n========== Same Retrieval =========="
-                )
-
+                print("\n========== Same Context: Stop Retry ==========")
                 break
 
+            # Accept the new retrieval result.
+            search_question = candidate_question
+            rag_result = candidate_result
             previous_hash = current_hash
 
+            # Evaluate against the original user question,
+            # not the rewritten search query.
             evaluation = self.evaluator.evaluate(
-                question=rewritten_question,
-                context=answer,
+                question=original_question,
+                context=rag_result["context"],
             )
 
-            print(
-                "\n========== Evaluation =========="
-            )
-
+            print("\n========== Re-Evaluation ==========")
             print(evaluation)
 
-        # -----------------------------
-        # Save Assistant Message
-        # -----------------------------
-        container.memory_service.remember_assistant(
-            answer
-        )
+        # 6. Final answer guard
+        if not evaluation.enough_context:
+            answer = (
+                "I couldn't find enough information in the available "
+                "documents to answer this question reliably."
+            )
 
-        # -----------------------------
-        # Final Response
-        # -----------------------------
+            print("\n========== Final Answer Guard ==========")
+            print("Insufficient evidence. Using safe fallback.")
+        else:
+            answer = rag_result["answer"]
+
+        # 7. Save assistant response
+        container.memory_service.remember_assistant(answer)
+
+        # 8. Return response and diagnostics
         return {
-            "question": question,
-            "rewritten_question": rewritten_question,
+            "question": original_question,
+            "rewritten_question": search_question,
             "answer": answer,
+            "sources": rag_result["sources"],
+            "documents": rag_result["documents"],
             "evaluation": evaluation,
             "retry_count": retry_state.retries,
         }

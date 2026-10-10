@@ -9,11 +9,13 @@ class BaseTool(ABC):
     Every tool must implement:
     - name
     - description
+    - parameters
     - run()
     """
 
     name: str
     description: str
+    parameters: dict[str, Any] = {}
 
     @abstractmethod
     def run(self, **kwargs: Any) -> Any:
@@ -22,7 +24,7 @@ class BaseTool(ABC):
         """
         pass
 
-    def schema(self) -> dict:
+    def schema(self) -> dict[str, Any]:
         """
         Return tool metadata used by the planner.
         """
@@ -30,4 +32,5 @@ class BaseTool(ABC):
         return {
             "name": self.name,
             "description": self.description,
+            "parameters": self.parameters,
         }

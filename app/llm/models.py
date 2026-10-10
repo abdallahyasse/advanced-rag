@@ -7,6 +7,7 @@ class ToolResponse(BaseModel):
     """
 
     thought: str = Field(
+        default="",
         description="Reasoning for selecting the tool."
     )
 

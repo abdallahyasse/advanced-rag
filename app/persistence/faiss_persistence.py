@@ -8,8 +8,12 @@ from app.vectorstore.faiss_store import FAISSVectorStore
 
 class FAISSRepository:
     """
-    Handles saving and loading FAISS indexes.
+    Handles saving and loading FAISS indexes
+    and document metadata.
     """
+
+    INDEX_FILENAME = "faiss.index"
+    DOCUMENTS_FILENAME = "documents.pkl"
 
     @staticmethod
     def save(
@@ -24,16 +28,28 @@ class FAISSRepository:
             exist_ok=True,
         )
 
+        if store.index is None:
+            raise RuntimeError(
+                "Cannot save an empty FAISS index."
+            )
+
+        # Save FAISS index
         faiss.write_index(
             store.index,
-            str(path / "faiss.index"),
+            str(
+                path / FAISSRepository.INDEX_FILENAME
+            ),
         )
 
+        # Save documents and metadata
         with open(
-            path / "chunks.pkl",
+            path / FAISSRepository.DOCUMENTS_FILENAME,
             "wb",
         ) as f:
-            pickle.dump(store.chunks, f)
+            pickle.dump(
+                store.documents,
+                f,
+            )
 
     @staticmethod
     def load(
@@ -44,15 +60,19 @@ class FAISSRepository:
 
         store = FAISSVectorStore()
 
+        # Load FAISS index
         store.index = faiss.read_index(
-            str(path / "faiss.index")
+            str(
+                path / FAISSRepository.INDEX_FILENAME
+            )
         )
 
+        # Load documents and metadata
         with open(
-            path / "chunks.pkl",
+            path / FAISSRepository.DOCUMENTS_FILENAME,
             "rb",
         ) as f:
-            store.chunks = pickle.load(f)
+            store.documents = pickle.load(f)
 
         return store
 
@@ -64,9 +84,15 @@ class FAISSRepository:
         path = Path(directory)
 
         return (
-            (path / "faiss.index").exists()
+            (
+                path
+                / FAISSRepository.INDEX_FILENAME
+            ).exists()
             and
-            (path / "chunks.pkl").exists()
+            (
+                path
+                / FAISSRepository.DOCUMENTS_FILENAME
+            ).exists()
         )
 
     @staticmethod
@@ -76,11 +102,18 @@ class FAISSRepository:
 
         path = Path(directory)
 
-        index_file = path / "faiss.index"
-        chunks_file = path / "chunks.pkl"
+        index_file = (
+            path
+            / FAISSRepository.INDEX_FILENAME
+        )
+
+        documents_file = (
+            path
+            / FAISSRepository.DOCUMENTS_FILENAME
+        )
 
         if index_file.exists():
             index_file.unlink()
 
-        if chunks_file.exists():
-            chunks_file.unlink()
+        if documents_file.exists():
+            documents_file.unlink()

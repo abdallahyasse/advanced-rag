@@ -1,9 +1,11 @@
+from app.agent.models import ToolResult
 from app.agent.tools.base import BaseTool
 
 
 class CalculatorTool(BaseTool):
     """
     Calculator Tool.
+
     Executes simple mathematical expressions.
     """
 
@@ -14,10 +16,21 @@ class CalculatorTool(BaseTool):
         "Supports +, -, *, /, %, ** and parentheses."
     )
 
-    def run(self, expression: str):
-        """
-        Execute a mathematical expression.
-        """
+    parameters = {
+        "type": "object",
+        "properties": {
+            "expression": {
+                "type": "string",
+                "description": "Mathematical expression to calculate.",
+            }
+        },
+        "required": ["expression"],
+    }
+
+    def run(
+        self,
+        expression: str,
+    ) -> ToolResult:
 
         try:
 
@@ -27,14 +40,16 @@ class CalculatorTool(BaseTool):
                 {},
             )
 
-            return {
-                "success": True,
-                "result": result,
-            }
+            return ToolResult(
+                success=True,
+                tool=self.name,
+                result=result,
+            )
 
         except Exception as e:
 
-            return {
-                "success": False,
-                "error": str(e),
-            }
+            return ToolResult(
+                success=False,
+                tool=self.name,
+                error=str(e),
+            )

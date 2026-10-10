@@ -4,29 +4,34 @@ from app.embeddings.embedding_service import EmbeddingService
 
 
 class FAISSVectorStore:
-    """
-    Production FAISS Vector Store.
-    Responsible for:
-    - Building the index
-    - Storing chunks
-    - Searching
-    """
 
     def __init__(self):
+
         self.index: faiss.Index | None = None
-        self.chunks: list[str] = []
 
-    def build(self, chunks: list[str]) -> None:
-        """
-        Build the FAISS index from text chunks.
-        """
-        self.chunks = chunks
+        self.documents: list[dict] = []
 
-        vectors = EmbeddingService.embed_texts(chunks)
+    def build(
+        self,
+        documents: list[dict],
+    ) -> None:
+
+        self.documents = documents
+
+        texts = [
+            doc["text"]
+            for doc in documents
+        ]
+
+        vectors = EmbeddingService.embed_texts(
+            texts
+        )
 
         dimension = vectors.shape[1]
 
-        self.index = faiss.IndexFlatL2(dimension)
+        self.index = faiss.IndexFlatL2(
+            dimension
+        )
 
         self.index.add(vectors)
 
@@ -35,30 +40,37 @@ class FAISSVectorStore:
         query: str,
         top_k: int = 5,
     ) -> list[dict]:
-        """
-        Search the FAISS index for the most similar chunks.
-        """
 
         if self.index is None:
-            raise RuntimeError("Vector index has not been built.")
+            raise RuntimeError(
+                "Vector index has not been built."
+            )
 
-        query_vector = EmbeddingService.embed_query(query)
+        query_vector = EmbeddingService.embed_query(
+            query
+        )
 
-        distances, indices = self.index.search(query_vector, top_k)
+        distances, indices = self.index.search(
+            query_vector,
+            top_k,
+        )
 
         results = []
 
         for rank, idx in enumerate(indices[0]):
 
-            # Ignore invalid FAISS results
-            if idx < 0 or idx >= len(self.chunks):
+            if idx < 0 or idx >= len(self.documents):
                 continue
+
+            document = self.documents[idx]
 
             results.append(
                 {
-                    "text": self.chunks[idx],
+                    "text": document["text"],
+                    "page": document.get("page"),
+                    "source": document.get("source"),
                     "score": float(distances[0][rank]),
-                    "index": int(idx),
+                    "index": idx,
                 }
             )
 

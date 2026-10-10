@@ -1,424 +1,292 @@
 ---
-title: 🚀 Production Agentic RAG API
-emoji: 🚀
+title: "Production Agentic RAG API"
+emoji: "🚀"
 colorFrom: blue
 colorTo: purple
 sdk: docker
 pinned: false
 ---
 
-# 🚀 Production RAG API
+# 🚀 Production Agentic RAG API
 
-A production-ready Agentic Retrieval-Augmented Generation (RAG) system built with FastAPI, FAISS, BM25, SentenceTransformers, CrossEncoder, FLAN-T5, Reflection Agents, Conversation Memory, Query Rewriting, Retrieval Evaluation and Retry Pipeline.
+A modular Retrieval-Augmented Generation (RAG) system built with Python, FastAPI, FAISS, BM25, SentenceTransformers, Cross-Encoder reranking, and FLAN-T5.
 
-The project follows a modular AI architecture inspired by modern Agentic RAG systems with clean dependency injection, persistent indexes, memory, evaluation loops, Docker deployment and scalable components..
+The project combines hybrid document retrieval with an LLM tool-calling agent and an Agentic RAG workflow designed to improve answer reliability through context evaluation, query rewriting, controlled retrieval retries, and final answer validation.
 
----
+## ✨ Key Features
 
-# ✨ Features
+### 1. Advanced RAG Pipeline
 
-### Core RAG
+- PDF ingestion and document chunking
+- SentenceTransformer embeddings
+- Dense retrieval using FAISS
+- Sparse retrieval using BM25
+- Hybrid search with Reciprocal Rank Fusion (RRF)
+- Cross-Encoder reranking
+- FLAN-T5 answer generation
+- Source-aware document retrieval
 
-- 📄 PDF Ingestion
-- ✂️ Automatic Chunking
-- 🧠 SentenceTransformer Embeddings
-- 🔍 FAISS Dense Retrieval
-- 🔎 BM25 Sparse Retrieval
-- ⚡ Hybrid Search
-- 🎯 CrossEncoder Reranking
-- 🤖 FLAN-T5 Generation
+### 2. Agentic RAG
 
-### Agentic RAG
+- **Reflection:** Analyzes questions and helps determine whether rewriting is needed.
+- **Context-Aware Query Rewriting:** Improves questions using conversation context when necessary.
+- **Retrieval Evaluation:** Evaluates whether the retrieved context sufficiently supports an answer.
+- **Search Query Rewriting:** Improves search queries when initial retrieval is insufficient.
+- **Adaptive Retrieval:** Adjusts retrieval depth during retries within configured limits.
+- **Retry Control:** Limits repeated retrieval attempts.
+- **Retrieval Guard:** Detects repeated retrieval results and prevents ineffective retries.
+- **Final Answer Guard:** Returns an insufficient-information response when the available evidence cannot support a reliable answer.
+- **Conversation Memory:** Stores interactions to support conversational workflows.
+- **Source-Aware Responses:** Provides retrieved document information alongside the answer.
 
-- 🧠 Reflection Agent
-- ✍️ Query Rewriter
-- 🔍 Search Query Rewriter
-- 📊 Retrieval Evaluation
-- 🔁 Automatic Retrieval Retry
-- 💬 Conversation Memory
-- 📚 Context Builder
+### 3. LLM Tool-Calling Agent
 
-### Agent Framework
+The project includes a modular tool framework with:
 
-- 🛠 Tool Registry
-- 📄 PDF Tool
-- 🔢 Calculator Tool
-- 🤖 RAG Tool
-- 🧩 Planner
-- ⚙️ Executor
-- 📤 Output Parser
+- Calculator tool
+- PDF tool
+- RAG tool
+- Tool registry
+- Planner and executor components
+- Agent output and response handling
 
-### LangGraph
+### 4. API and Production Infrastructure
 
-- 🌐 LangGraph Ready
-- 🧠 Graph State
-- 🔀 Nodes & Edges
+- FastAPI REST API
+- Swagger and OpenAPI documentation
+- Health-check endpoint
+- Dependency injection
+- Centralized configuration
+- Structured logging and exception handling
+- Persistent FAISS and BM25 index support
+- Docker-based deployment configuration
 
-### API
-
-- 🌐 FastAPI
-- 📚 Swagger
-- ❤️ Health Endpoint
-
-### Production
-
-- 📝 Structured Logging
-- ⚠️ Exception Handling
-- 💾 Persistent Indexes
-- 🐳 Docker
-- 🧪 Unit Tests
-- 🏗 Clean Architecture
-
----
-
-# 🏗 Architecture
+## 🏗️ Architecture
 
 ```text
-                    User
-                      │
-                      ▼
-             Agentic RAG Workflow
-                      │
-          ┌───────────┴───────────┐
-          │                       │
-          ▼                       ▼
-   Reflection Agent        Conversation Memory
-          │                       │
-          └───────────┬───────────┘
-                      ▼
-              Query Rewriter
-                      ▼
-             Hybrid Retrieval
-              ┌──────────────┐
-              │              │
-              ▼              ▼
-          FAISS         BM25 Search
-              └──────┬──────┘
-                     ▼
-          CrossEncoder Reranker
-                     ▼
-             FLAN-T5 Generator
-                     ▼
-          Retrieval Evaluation
-                     │
-      enough? ───────┴──────── no
-          │                    │
-         yes                   ▼
-          │            Search Query Rewriter
-          │                    │
-          └────────────Retry────┘
-                     ▼
-                Final Answer
+                         User Question
+                               |
+                               v
+                      Agentic RAG Workflow
+                               |
+                    Reflection / Query Rewrite
+                               |
+                               v
+                       Hybrid Retrieval
+                         /           \
+                        v             v
+                      FAISS          BM25
+                         \           /
+                          v         v
+                    Reciprocal Rank Fusion
+                               |
+                               v
+                      Cross-Encoder Reranking
+                               |
+                               v
+                       Retrieved Context
+                               |
+                               v
+                       Context Evaluation
+                         /           \
+                        v             v
+                  Sufficient      Insufficient
+                      |                |
+                      v                v
+                  Generation     Search Query Rewrite
+                      |                |
+                      v                v
+                Answer Guard      Controlled Retry
+                      |                |
+                      +-------<--------+
+                      |
+                      v
+                Final Answer + Sources
+```
 
----
+The workflow uses bounded retries and retrieval-result checks to avoid repeatedly executing ineffective searches. Final answer validation helps prevent unsupported responses when the available documents do not contain sufficient evidence.
+
+## 🛠️ Technology Stack
+
+| Component | Technologies |
+|---|---|
+| Language | Python |
+| API | FastAPI, Uvicorn |
+| Dense Retrieval | FAISS |
+| Sparse Retrieval | BM25, rank-bm25 |
+| Embeddings | SentenceTransformers |
+| Reranking | Cross-Encoder |
+| Generation | Hugging Face Transformers, FLAN-T5 |
+| LLM Integration | Groq API |
+| Persistence | FAISS and BM25 indexes |
+| Deployment | Docker, Docker Compose |
+| API Documentation | Swagger, OpenAPI |
+
+## 📁 Project Structure
 
 ```text
 app/
-│
-├── agent/
-│
-├── agentic_rag/
-│
-├── api/
-│
-├── config/
-│
-├── container/
-│
-├── embeddings/
-│
-├── generation/
-│
-├── index/
-│
-├── langgraph_agent/
-│
-├── llm/
-│
-├── logging/
-│
-├── memory/
-│
-├── persistence/
-│
-├── reranker/
-│
-├── retrieval/
-│
-├── services/
-│
-├── vectorstore/
-│
-└── main.py
+├── agent/             # Tool-calling agent
+│   └── tools/         # Calculator, PDF, and RAG tools
+├── agentic_rag/       # Reflection, evaluation, rewriting, retries
+├── api/               # API routes
+├── config/            # Application settings
+├── container/         # Dependency injection
+├── embeddings/        # Embedding components
+├── generation/        # Answer generation
+├── index/             # Index management
+├── langgraph_agent/   # LangGraph-related components
+├── llm/               # LLM client and models
+├── memory/            # Conversation memory
+├── persistence/       # Index persistence
+├── reranker/          # Cross-Encoder reranking
+├── retrieval/         # BM25 and hybrid retrieval
+├── services/          # RAG services
+├── vectorstore/       # FAISS vector store
+├── ingestion.py       # Document ingestion
+└── main.py            # Application entry point
 ```
 
----
+## ⚙️ Getting Started
 
-# ⚙ Installation
-
-## Clone Repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/abdallahyasse/advanced-rag.git
 cd advanced-rag
 ```
 
-## Create Virtual Environment
+### 2. Create a Virtual Environment
 
-```bash
-python -m venv venv
+**Windows PowerShell**
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 ```
 
-### Windows
+**Linux/macOS**
 
 ```bash
-venv\Scripts\activate
+python -m venv .venv
+source .venv/bin/activate
 ```
 
-### Linux / macOS
-
-```bash
-source venv/bin/activate
-```
-
-## Install Requirements
+### 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
+### 4. Configure Environment Variables
 
-# ⚙ Environment Variables
+Create a `.env` file in the project root and configure the variables supported by your application.
 
-Create a `.env` file:
+Example:
 
 ```env
 PDF_PATH=data/Abdullah.yasser.pdf
-
 INDEX_DIRECTORY=indexes
 
 EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
-
 RERANKER_MODEL=cross-encoder/ms-marco-MiniLM-L-6-v2
-
 LLM_MODEL=google/flan-t5-base
 
 CHUNK_SIZE=500
-
 CHUNK_OVERLAP=50
-```env
+
 PLANNER_MODEL=llama-3.3-70b-versatile
-GROQ_API_KEY=your_key_here
+GROQ_API_KEY=your_groq_api_key
 ```
 
----
+Ensure the PDF path and environment variable names match your actual configuration. Never commit real API keys or secrets.
 
-# ▶ Running the API
+### 5. Run the API
 
 ```bash
 python -m uvicorn app.main:app --reload
 ```
 
-API:
+Local endpoints:
 
-```
-http://127.0.0.1:8000
-```
+- API: http://127.0.0.1:8000
+- Swagger UI: http://127.0.0.1:8000/docs
+- OpenAPI schema: http://127.0.0.1:8000/openapi.json
 
----
-
-# 📚 API Documentation
-
-Swagger
-
-```
-http://127.0.0.1:8000/docs
-```
-
-OpenAPI
-
-```
-http://127.0.0.1:8000/openapi.json
-```
-
----
-
-# ❤️ Health Check
+### 6. Health Check
 
 ```http
 GET /health
 ```
 
-Response
+The response depends on the health-check implementation in the application.
 
-```json
-{
-  "status": "healthy",
-  "service": "Production RAG API",
-  "version": "1.0.0"
-}
-```
+## 🐳 Docker
 
----
-
-# 🚀 Root Endpoint
-
-```http
-GET /
-```
-
-```json
-{
-  "message": "Production RAG API",
-  "docs": "/docs",
-  "health": "/health"
-}
-```
-
----
-
-# 🔍 Query Endpoint
-
-```http
-POST /query
-```
-
-Request
-
-```json
-{
-  "question": "What is Machine Learning?",
-  "top_k": 3
-}
-```
-
-Response
-
-```json
-{
-  "answer": "Machine Learning is a branch of Artificial Intelligence."
-}
-```
-
----
-
-# 🐳 Docker
-
-Build
+Build the application:
 
 ```bash
 docker compose build
 ```
 
-Run
+Start the services:
 
 ```bash
 docker compose up
 ```
 
-Swagger
+Open Swagger UI at http://localhost:8000/docs.
 
-```
-http://localhost:8000/docs
-```
+Ensure required environment variables, documents, and persistent storage are configured for your deployment environment.
 
----
+## 🧪 Testing
 
-# 🧪 Run Tests
+Run the available tests:
 
 ```bash
 pytest
 ```
 
-or
+If a dedicated test directory exists:
 
 ```bash
 pytest tests/
 ```
 
----
+Run tests in your current environment before considering a release complete.
 
-# 🛠 Tech Stack
+## 🔍 Reliability and Evaluation
 
-- Python
-- FastAPI
-- FAISS
-- BM25
-- SentenceTransformers
-- CrossEncoder
-- Transformers
-- FLAN-T5
-- Groq API
-- LangGraph
-- Docker
-- Pytest
+The Agentic RAG workflow is designed to handle both answerable and unsupported questions.
 
----
+Test scenarios include:
 
-# 🏆 Production Features
+- Questions answerable from indexed documents
+- Questions that benefit from query rewriting
+- Questions requiring another retrieval attempt
+- Questions for which the documents lack sufficient evidence
+- Repeated retrieval results that should stop further retries
 
-## Retrieval
+For unsupported questions, the final answer guard is intended to return an insufficient-information response rather than accept an unsupported generated answer.
 
-- ✅ Dense Retrieval
-- ✅ Sparse Retrieval
-- ✅ Hybrid Search
-- ✅ CrossEncoder Reranking
+## 🚀 Roadmap
 
-## Agentic RAG
+- [x] Hybrid retrieval using FAISS and BM25
+- [x] Cross-Encoder reranking
+- [x] Production-oriented FastAPI architecture
+- [x] Tool-calling agent framework
+- [x] Agentic RAG workflow with evaluation and bounded retries
+- [x] Retrieval guard and final answer validation
+- [ ] GraphRAG and knowledge graph integration
+- [ ] Expanded automated evaluation and regression testing
+- [ ] Semantic caching
+- [ ] Further monitoring and observability
+- [ ] Production cloud deployment
+- [ ] Advanced agent workflows and MCP integration
 
-- ✅ Reflection
-- ✅ Query Rewriting
-- ✅ Retrieval Evaluation
-- ✅ Automatic Retry
-- ✅ Conversation Memory
-- ✅ Context Builder
+## 👨‍💻 Author
 
-## AI Agent
+**Abdalla Yasser** — AI Engineer
 
-- ✅ Tool Framework
-- ✅ Planner
-- ✅ Executor
-- ✅ LangGraph Ready
-
-## Infrastructure
-
-- ✅ Dependency Injection
-- ✅ Docker
-- ✅ Persistent Indexes
-- ✅ Logging
-- ✅ Exception Handling
-- ✅ REST API
-- ✅ Swagger
-
----
-# 🚧 Roadmap
-
-- ✅ Production RAG
-- ✅ Agentic RAG
-- 🔄 Full Tool Calling Agent
-- 🔄 GraphRAG
-- 🔄 Semantic Cache
-- 🔄 LangGraph Agent
-- 🔄 Multi-Agent System
-- 🔄 Browser Agent
-- 🔄 Text-to-SQL
-- 🔄 MCP Server / Client
-- 🔄 LLMOps Platform
-- 🔄 Kubernetes
-- 🔄 AWS Deployment
----
-
-# 👨‍💻 Author
-
-**Abdalla Yasser**
-
-AI Engineer
-
-**GitHub**
-
-https://github.com/abdallahyasse
-
-**LinkedIn**
-
-https://www.linkedin.com/in/abdullah-yasser-6a7748183
+- GitHub: https://github.com/abdallahyasse
+- LinkedIn: https://www.linkedin.com/in/abdullah-yasser-6a7748183/

@@ -6,6 +6,7 @@ from app.retrieval.bm25_service import BM25Service
 
 from app.logging.logger import get_logger
 
+
 logger = get_logger(__name__)
 
 
@@ -22,7 +23,7 @@ class IndexManager:
 
     def initialize(
         self,
-        chunks: list[str],
+        documents: list[dict],
     ) -> tuple[FAISSVectorStore, BM25Service]:
 
         if (
@@ -48,14 +49,27 @@ class IndexManager:
 
         logger.info("Building indexes...")
 
+        # -----------------------------
+        # Build FAISS Index
+        # -----------------------------
         faiss_store = FAISSVectorStore()
 
-        faiss_store.build(chunks)
+        faiss_store.build(
+            documents
+        )
 
+        # -----------------------------
+        # Build BM25 Index
+        # -----------------------------
         bm25_store = BM25Service()
 
-        bm25_store.build(chunks)
+        bm25_store.build(
+            documents
+        )
 
+        # -----------------------------
+        # Save Indexes
+        # -----------------------------
         FAISSRepository.save(
             faiss_store,
             self.directory,

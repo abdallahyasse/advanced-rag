@@ -50,7 +50,9 @@ class BM25Repository:
 
         path = Path(directory)
 
-        return (path / "bm25.pkl").exists()
+        return (
+            path / "bm25.pkl"
+        ).exists()
 
     @staticmethod
     def delete(
@@ -59,7 +61,9 @@ class BM25Repository:
 
         path = Path(directory)
 
-        bm25_file = path / "bm25.pkl"
+        bm25_file = (
+            path / "bm25.pkl"
+        )
 
         if bm25_file.exists():
             bm25_file.unlink()

@@ -1,4 +1,3 @@
-from app.container.dependencies import container
 from app.llm.groq_client import GroqClient
 from app.agentic_rag.models import RewriteResult
 
@@ -15,8 +14,9 @@ Rules:
 
 - Preserve the original meaning.
 - Resolve pronouns.
-- Expand abbreviations if needed.
-- Use conversation history.
+- Use previous conversation when needed.
+- Expand abbreviations if useful.
+- Do NOT answer the question.
 - Return JSON only.
 
 Schema:
@@ -36,21 +36,22 @@ class QueryRewriter:
     def rewrite(
         self,
         question: str,
+        conversation_context: str,
     ) -> RewriteResult:
-
-        context = container.context_builder.build_context(
-            question
-        )
 
         prompt = f"""
 {SYSTEM_PROMPT}
 
 Conversation:
 
-{context}
+{conversation_context}
+
+Last User Question:
+
+{question}
 """
 
         return self.llm.chat(
-            prompt,
-            RewriteResult,
+            prompt=prompt,
+            response_model=RewriteResult,
         )

@@ -28,3 +28,14 @@ indexes/
 # User PDFs
 data/*.pdf
 !data/README.md
+# Local backups and temporary diagnostics
+indexes_backup/
+*.bak
+*.backup
+app/agent/agent
+app/agent/agent_save_probe.py
+app/agent/agent_save_probe.tmp
+app/agent/agent_save_test.py
+app/agent/vscode_save_test.txt
+
+test_rag.py
